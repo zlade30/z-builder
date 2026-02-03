@@ -8,6 +8,11 @@ set PYVER=3.12.1
 set PYDIR=%USERPROFILE%\python-portable
 
 :: ----------------------------
+:: Embedded Python needs PYTHONPATH
+:: ----------------------------
+set PYTHONPATH=%PYDIR%\Lib\site-packages
+
+:: ----------------------------
 :: Create folder
 :: ----------------------------
 echo Creating folder %PYDIR%...
