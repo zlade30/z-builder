@@ -28,13 +28,13 @@ tar -xf python.zip
 del python.zip
 
 :: ----------------------------
-:: Enable site-packages
+:: Enable site-packages properly
 :: ----------------------------
 echo Configuring embedded Python paths...
 for %%f in (*._pth) do (
-    powershell -NoProfile -Command ^
-        "$p='%%f'; @('python312.zip','.', 'Lib', 'Lib\site-packages','import site') | Set-Content $p"
+    powershell -NoProfile -Command "$p='%%f'; @('python312.zip','.', 'Lib', 'Lib\site-packages','import site') | Set-Content $p"
 )
+
 
 :: ----------------------------
 :: Add Scripts folder to PATH temporarily
