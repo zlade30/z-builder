@@ -36,8 +36,11 @@ del python.zip
 :: ----------------------------
 echo Configuring embedded Python paths...
 for %%f in (*._pth) do (
-    powershell -NoProfile -Command ^
-        "$p='%%f'; @('python312.zip','.', 'Lib', 'Lib\site-packages','import site') | Set-Content -Encoding ASCII $p"
+    (
+    echo python312.zip
+    echo .
+    echo import site
+    ) > "%%f"
 )
 
 :: ----------------------------
@@ -57,7 +60,6 @@ curl -L https://bootstrap.pypa.io/get-pip.py -o get-pip.py
 :: ----------------------------
 echo Installing pip...
 "%PYDIR%\python.exe" get-pip.py --target="%PYDIR%\Lib\site-packages" --no-warn-script-location
-
 del get-pip.py
 
 :: ----------------------------
