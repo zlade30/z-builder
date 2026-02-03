@@ -1,5 +1,5 @@
 @echo off
-setlocal
+setlocal EnableExtensions
 
 :: ----------------------------
 :: Configurable variables
@@ -11,7 +11,7 @@ set PYDIR=%USERPROFILE%\python-portable
 :: Create folder
 :: ----------------------------
 echo Creating folder %PYDIR%...
-mkdir "%PYDIR%"
+mkdir "%PYDIR%" 2>nul
 cd /d "%PYDIR%"
 
 :: ----------------------------
@@ -28,18 +28,20 @@ tar -xf python.zip
 del python.zip
 
 :: ----------------------------
-:: Enable site-packages properly
+:: Configure embedded Python paths
 :: ----------------------------
-echo Configuring embedded Python paths...
+echo Configuring embedded Python (_pth)...
 for %%f in (*._pth) do (
-    powershell -NoProfile -Command "$p='%%f'; @('python312.zip','.', 'Lib', 'Lib\site-packages','import site') | Set-Content $p"
+    powershell -NoProfile -Command ^
+        "$p='%%f'; @('python312.zip','.', 'Lib', 'Lib\site-packages','import site') | Set-Content -Encoding ASCII $p"
 )
 
-
 :: ----------------------------
-:: Add Scripts folder to PATH temporarily
+:: Prepare site-packages
 :: ----------------------------
-set PATH=%PYDIR%;%PYDIR%\Scripts;%PATH%
+echo Creating Lib and site-packages...
+mkdir "%PYDIR%\Lib" 2>nul
+mkdir "%PYDIR%\Lib\site-packages" 2>nul
 
 :: ----------------------------
 :: Download pip installer
@@ -48,10 +50,10 @@ echo Downloading get-pip.py...
 curl -L https://bootstrap.pypa.io/get-pip.py -o get-pip.py
 
 :: ----------------------------
-:: Install pip
+:: Install pip (embedded-safe)
 :: ----------------------------
 echo Installing pip...
-"%PYDIR%\python.exe" get-pip.py --no-warn-script-location
+"%PYDIR%\python.exe" get-pip.py --target="%PYDIR%\Lib\site-packages" --no-warn-script-location
 
 :: ----------------------------
 :: Cleanup
@@ -62,13 +64,14 @@ del get-pip.py
 :: Done
 :: ----------------------------
 echo.
-echo Python portable installation complete!
-echo Python location: %PYDIR%
+echo ===============================
+echo Python portable install complete
+echo ===============================
+echo Location: %PYDIR%
 echo.
-echo Test Python:
+echo Test:
 echo   "%PYDIR%\python.exe" --version
 echo   "%PYDIR%\python.exe" -m pip --version
 echo.
-echo Optional: Add "%PYDIR%" and "%PYDIR%\Scripts" to your PATH to use python and pip globally.
 pause
 endlocal
