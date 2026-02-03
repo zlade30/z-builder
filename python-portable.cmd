@@ -30,10 +30,10 @@ del python.zip
 :: ----------------------------
 :: Enable site-packages
 :: ----------------------------
-echo Enabling site-packages...
+echo Configuring embedded Python paths...
 for %%f in (*._pth) do (
     powershell -NoProfile -Command ^
-        "$f = '%%f'; (Get-Content $f) -replace '#import site','import site' | Set-Content $f"
+        "$p='%%f'; @('python312.zip','.', 'Lib', 'Lib\site-packages','import site') | Set-Content $p"
 )
 
 :: ----------------------------
