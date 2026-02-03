@@ -2,56 +2,54 @@
 setlocal EnableExtensions
 
 :: ----------------------------
-:: Configurable variables
+:: Config
 :: ----------------------------
 set PYVER=3.12.1
 set PYDIR=%USERPROFILE%\python-portable
 
-:: ----------------------------
-:: Embedded Python needs PYTHONPATH
-:: ----------------------------
-set PYTHONPATH=%PYDIR%\Lib\site-packages
+echo.
+echo Installing Python %PYVER% (embedded) to:
+echo   %PYDIR%
+echo.
 
 :: ----------------------------
 :: Create folder
 :: ----------------------------
-echo Creating folder %PYDIR%...
 mkdir "%PYDIR%" 2>nul
 cd /d "%PYDIR%"
 
 :: ----------------------------
-:: Download Python Embedded
+:: Download embedded Python
 :: ----------------------------
-echo Downloading Python %PYVER% Embedded...
+echo Downloading Python...
 curl -L https://www.python.org/ftp/python/%PYVER%/python-%PYVER%-embed-amd64.zip -o python.zip
 
 :: ----------------------------
 :: Extract
 :: ----------------------------
-echo Extracting Python...
+echo Extracting...
 tar -xf python.zip
 del python.zip
 
 :: ----------------------------
-:: Configure embedded Python paths
+:: Fix _pth file (CRITICAL)
 :: ----------------------------
-echo Configuring embedded Python (_pth)...
+echo Configuring embedded Python paths...
 for %%f in (*._pth) do (
     powershell -NoProfile -Command ^
         "$p='%%f'; @('python312.zip','.', 'Lib', 'Lib\site-packages','import site') | Set-Content -Encoding ASCII $p"
 )
 
 :: ----------------------------
-:: Prepare site-packages
+:: Create site-packages
 :: ----------------------------
-echo Creating Lib and site-packages...
 mkdir "%PYDIR%\Lib" 2>nul
 mkdir "%PYDIR%\Lib\site-packages" 2>nul
 
 :: ----------------------------
 :: Download pip installer
 :: ----------------------------
-echo Downloading get-pip.py...
+echo Downloading pip installer...
 curl -L https://bootstrap.pypa.io/get-pip.py -o get-pip.py
 
 :: ----------------------------
@@ -60,23 +58,35 @@ curl -L https://bootstrap.pypa.io/get-pip.py -o get-pip.py
 echo Installing pip...
 "%PYDIR%\python.exe" get-pip.py --target="%PYDIR%\Lib\site-packages" --no-warn-script-location
 
-:: ----------------------------
-:: Cleanup
-:: ----------------------------
 del get-pip.py
+
+:: ----------------------------
+:: Create launcher wrapper (THIS IS THE KEY)
+:: ----------------------------
+echo Creating python launcher...
+
+(
+echo @echo off
+echo setlocal
+echo set PYTHONPATH=%%~dp0Lib\site-packages
+echo "%%~dp0python.exe" %%*
+) > "%PYDIR%\python.bat"
 
 :: ----------------------------
 :: Done
 :: ----------------------------
 echo.
 echo ===============================
-echo Python portable install complete
+echo INSTALL COMPLETE
 echo ===============================
-echo Location: %PYDIR%
 echo.
-echo Test:
-echo   "%PYDIR%\python.exe" --version
-echo   "%PYDIR%\python.exe" -m pip --version
+echo IMPORTANT:
+echo Use python.bat (NOT python.exe)
+echo.
+echo Examples:
+echo   %PYDIR%\python.bat --version
+echo   %PYDIR%\python.bat -m pip --version
+echo   %PYDIR%\python.bat -m pip install requests
 echo.
 pause
 endlocal
