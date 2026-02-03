@@ -15,7 +15,8 @@ del python.zip
 
 echo Enabling site-packages...
 for %%f in (*._pth) do (
-  powershell -Command "(Get-Content %%f) -replace '#import site','import site' | Set-Content %%f"
+  powershell -NoProfile -Command ^
+    "$f = '%%f'; (Get-Content $f) -replace '#import site','import site' | Set-Content $f"
 )
 
 echo Downloading pip installer...
